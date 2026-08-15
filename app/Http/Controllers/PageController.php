@@ -950,6 +950,65 @@ class PageController extends Controller
         return view('pages.checkout-success', compact('transaksi', 'paymentGateway', 'waAdmin'));
     }
 
+    public function notifyPayment(Request $request)
+    {
+        $orderId = $request->input('order_id');
+        $transaksi = DB::table('tb_transaksi')->where('kode_invoice', $orderId)->first();
+        if (!$transaksi) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan.']);
+        }
+
+        $paymentSettings = DB::table('tb_pengaturan')
+            ->whereIn('setting_nama', ['admin_wa_number', 'fonnte_api_token'])
+            ->pluck('setting_nilai', 'setting_nama');
+
+        $waAdmin = $paymentSettings['admin_wa_number'] ?? '';
+        $token = $paymentSettings['fonnte_api_token'] ?? '';
+
+        if (empty($waAdmin) || empty($token)) {
+            return response()->json(['success' => false, 'message' => 'Konfigurasi Fonnte belum diatur oleh admin.']);
+        }
+
+        $amount = number_format($transaksi->total_final, 0, ',', '.');
+        $buyerName = Auth::check() ? Auth::user()->nama : 'Pelanggan';
+        
+        $message = "Halo Admin! 👋\nAda pesanan masuk baru yang mengklaim sudah melakukan pembayaran via QRIS.\n\n";
+        $message .= "*Order ID:* {$orderId}\n";
+        $message .= "*Pembeli:* {$buyerName}\n";
+        $message .= "*Nominal Bayar:* Rp{$amount}\n\n";
+        $message .= "Mohon segera cek mutasi rekening Anda dan ubah status pesanan menjadi 'Diproses' di dashboard jika dana sudah valid masuk.";
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.fonnte.com/send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'target' => $waAdmin,
+                'message' => $message,
+                'countryCode' => '62',
+            ),
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: ' . $token
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        curl_close($curl);
+
+        if ($err) {
+            return response()->json(['success' => false, 'message' => 'Gagal terhubung ke server WhatsApp (Fonnte).']);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Notifikasi pembayaran berhasil dikirim ke Admin!']);
+    }
+
     // =================================================================
     // 9.5 MIDTRANS WEBHOOK / FRONTEND CALLBACK (Status Pembayaran)
     // =================================================================

@@ -595,7 +595,13 @@
                             <div>
                                 <label class="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Nomor WhatsApp Admin (Penerima Konfirmasi)</label>
                                 <input type="text" name="admin_wa_number" value="{{ $settings['admin_wa_number'] ?? '' }}" class="form-control-custom w-full p-3 bg-white border border-blue-200 rounded-xl text-sm font-bold text-slate-800 placeholder-slate-400" placeholder="Format: 62812xxx">
-                                <p class="text-[10px] font-bold text-slate-500 mt-1 ml-1">Pembeli akan diarahkan mengirim chat WA ke nomor ini setelah scan QRIS.</p>
+                                <p class="text-[10px] font-bold text-slate-500 mt-1 ml-1">Notifikasi otomatis Fonnte akan dikirim ke nomor admin ini.</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Token API Fonnte</label>
+                                <input type="text" name="fonnte_api_token" value="{{ $settings['fonnte_api_token'] ?? '' }}" class="form-control-custom w-full p-3 bg-white border border-blue-200 rounded-xl text-sm font-bold text-slate-800 placeholder-slate-400 font-mono" placeholder="Token dari dasbor Fonnte...">
+                                <p class="text-[10px] font-bold text-slate-500 mt-1 ml-1">Dapatkan token API gratis di <a href="https://fonnte.com/" target="_blank" class="text-blue-500 hover:underline">fonnte.com</a>.</p>
                             </div>
                         </div>
                     </div>

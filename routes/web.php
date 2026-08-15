@@ -88,6 +88,7 @@ Route::controller(PageController::class)->group(function () {
     Route::match(['get', 'post'], '/checkout', 'checkout')->name('checkout');
     Route::post('/checkout/proses', 'prosesCheckout')->name('checkout.process');
     Route::get('/checkout-success', 'checkoutSuccess')->name('checkout.success');
+    Route::post('/checkout/notify-payment', 'notifyPayment')->name('checkout.notify');
 
     // Profil User
     Route::get('/profil-saya', 'profil')->name('profil.index');

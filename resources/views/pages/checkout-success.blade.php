@@ -45,13 +45,9 @@
                             </div>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Buka aplikasi DANA, GoPay, OVO, ShopeePay, atau m-Banking Anda, lalu scan QRIS di atas.<br>Nominal <b>Rp{{ number_format($transaksi->total_final, 0, ',', '.') }}</b> akan terisi otomatis.</p>
                             
-                            @php
-                                $waText = "Halo Admin, saya sudah membayar pesanan dengan ID " . $transaksi->kode_invoice . " sebesar Rp" . number_format($transaksi->total_final, 0, ',', '.') . ". Mohon segera diproses ya.";
-                                $waUrl = "https://wa.me/" . $waAdmin . "?text=" . urlencode($waText);
-                            @endphp
-                            <a href="{{ $waUrl }}" target="_blank" class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-[#25D366]/30 flex items-center justify-center gap-2">
+                            <button id="notify-admin-btn" data-order="{{ $transaksi->kode_invoice }}" class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-[#25D366]/30 flex items-center justify-center gap-2">
                                 <i class="fab fa-whatsapp text-lg"></i> Cek Status Pembayaran (Konfirmasi WA)
-                            </a>
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -104,6 +100,43 @@
             colorDark : "#000000",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.M
+        });
+
+        document.getElementById('notify-admin-btn').addEventListener('click', function() {
+            let btn = this;
+            let originalText = btn.innerHTML;
+            let orderId = btn.getAttribute('data-order');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i> Memeriksa...';
+            btn.disabled = true;
+
+            fetch("{{ route('checkout.notify') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ order_id: orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    btn.innerHTML = '<i class="fas fa-check text-lg"></i> Menunggu Konfirmasi Admin';
+                    btn.classList.replace('bg-[#25D366]', 'bg-slate-500');
+                    btn.classList.replace('hover:bg-[#128C7E]', 'hover:bg-slate-600');
+                    btn.classList.replace('shadow-[#25D366]/30', 'shadow-slate-500/30');
+                    alert(data.message);
+                } else {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert(data.message || 'Terjadi kesalahan.');
+                }
+            })
+            .catch(error => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('Gagal terhubung ke server.');
+            });
         });
     </script>
 @endif
