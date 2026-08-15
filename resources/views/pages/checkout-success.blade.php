@@ -46,7 +46,7 @@
                             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Buka aplikasi DANA, GoPay, OVO, ShopeePay, atau m-Banking Anda, lalu scan QRIS di atas.<br>Nominal <b>Rp{{ number_format($transaksi->total_final, 0, ',', '.') }}</b> akan terisi otomatis.</p>
                             
                             <button id="notify-admin-btn" data-order="{{ $transaksi->kode_invoice }}" class="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-[#25D366]/30 flex items-center justify-center gap-2">
-                                <i class="fab fa-whatsapp text-lg"></i> Cek Status Pembayaran (Konfirmasi WA)
+                                <i class="fab fa-whatsapp text-lg"></i> Cek Status Pembayaran
                             </button>
                         </div>
                     @endif
