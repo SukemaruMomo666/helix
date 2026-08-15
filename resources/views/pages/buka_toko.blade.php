@@ -108,7 +108,7 @@
             </h1>
             
             <p class="text-zinc-400 text-lg font-medium leading-relaxed mb-10 max-w-sm">
-                Lengkapi profil toko Anda. Sistem kami akan menghubungkan material Anda dengan proyek konstruksi secara otomatis.
+                Lengkapi profil UMKM Anda. Sistem kami akan menghubungkan produk Anda dengan pembeli secara otomatis.
             </p>
 
             <div class="space-y-4">
@@ -150,7 +150,7 @@
             <div class="mb-10">
                 <h2 class="text-3xl font-black text-black tracking-tight mb-2">Buka Toko Mitra</h2>
                 <p class="text-zinc-500 font-medium text-sm">
-                    Satu langkah lagi untuk meroketkan penjualan material Anda.
+                    Satu langkah lagi untuk meroketkan penjualan produk UMKM Anda.
                 </p>
             </div>
 
@@ -173,8 +173,8 @@
                     <div class="space-y-5">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div class="relative group">
-                                <label class="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Nama Toko Material <span class="text-red-500">*</span></label>
-                                <input type="text" name="nama_toko" required value="{{ old('nama_toko') }}" placeholder="TB. Makmur Jaya" class="w-full bg-zinc-50 border-2 border-zinc-200 text-black text-sm font-semibold rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 px-5 py-4 transition-all outline-none">
+                                <label class="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Nama UMKM / Toko <span class="text-red-500">*</span></label>
+                                <input type="text" name="nama_toko" required value="{{ old('nama_toko') }}" placeholder="UMKM Makmur Jaya" class="w-full bg-zinc-50 border-2 border-zinc-200 text-black text-sm font-semibold rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 px-5 py-4 transition-all outline-none">
                             </div>
                             <div class="relative group">
                                 <label class="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Telepon / WA Toko <span class="text-red-500">*</span></label>
@@ -189,7 +189,7 @@
                                     <h2 class="text-base font-black text-black flex items-center gap-2">
                                         <i class="fas fa-map-marked-alt text-blue-600"></i> Titik Lokasi GPS Toko
                                     </h2>
-                                    <p class="text-[11px] text-zinc-500 mt-1 font-medium">Geser pin merah ke lokasi persis gudang material Anda untuk kurir sistem.</p>
+                                    <p class="text-[11px] text-zinc-500 mt-1 font-medium">Geser pin merah ke lokasi persis UMKM Anda untuk kurir sistem.</p>
                                 </div>
                                 <button type="button" onclick="getLocation()" class="shrink-0 bg-zinc-900 hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-2">
                                     <i class="fas fa-crosshairs"></i> Gunakan GPS HP
@@ -212,7 +212,7 @@
                         </div>
 
                         <div class="relative group">
-                            <label class="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Alamat Gudang Fisik <span class="text-red-500">*</span></label>
+                            <label class="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Alamat Toko / Gudang <span class="text-red-500">*</span></label>
                             <textarea name="alamat_toko" id="alamat_toko" rows="3" required placeholder="Nama Jalan, Nomor Bangunan, RT/RW, Patokan..." class="custom-scrollbar w-full bg-zinc-50 border-2 border-zinc-200 text-black text-sm font-semibold rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10 px-5 py-4 transition-all outline-none resize-none">{{ old('alamat_toko') }}</textarea>
                         </div>
 
