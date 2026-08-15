@@ -833,20 +833,87 @@ class PageController extends Controller
                 DB::table('tb_keranjang')->where('user_id', $user->id)->whereIn('id', $selectedIds)->delete();
             }
 
-            // 7. DANA GATEWAY (NATIVE API)
-            $danaService = new \App\Services\DanaApiService();
-            $returnUrl = url('/checkout-success?order_id=' . $orderId); 
+            // 7. PAYMENT GATEWAY SELECTION
+            $paymentSettings = DB::table('tb_pengaturan')
+                ->whereIn('setting_nama', ['payment_gateway', 'qris_statis_string', 'midtrans_server_key', 'midtrans_is_production'])
+                ->pluck('setting_nilai', 'setting_nama');
             
-            $danaResult = $danaService->createOrder($orderId, $midtransGrossAmount, 'Pesanan ' . $orderId, $returnUrl);
+            $paymentGateway = $paymentSettings['payment_gateway'] ?? 'qris_dinamis';
+            $checkoutUrl = url('/checkout-success?order_id=' . $orderId);
+            $snapToken = null;
 
-            if (!$danaResult['success']) {
-                throw new \Exception($danaResult['message'] ?? 'Gagal menghubungi DANA API');
+            if ($paymentGateway === 'midtrans') {
+                // MIDTRANS GATEWAY
+                \Midtrans\Config::$serverKey = $paymentSettings['midtrans_server_key'] ?? '';
+                \Midtrans\Config::$isProduction = ($paymentSettings['midtrans_is_production'] ?? '0') == '1';
+                \Midtrans\Config::$isSanitized = true;
+                \Midtrans\Config::$is3ds = true;
+
+                $params = array(
+                    'transaction_details' => array(
+                        'order_id' => $orderId,
+                        'gross_amount' => $midtransGrossAmount,
+                    ),
+                    'customer_details' => array(
+                        'first_name' => $request->input('shipping_nama_penerima') ?? Auth::user()->nama,
+                        'phone' => $request->input('shipping_telepon_penerima') ?? '',
+                        'email' => Auth::user()->email ?? '',
+                    ),
+                );
+
+                try {
+                    $snapToken = \Midtrans\Snap::getSnapToken($params);
+                } catch (\Exception $e) {
+                    throw new \Exception('Gagal menghubungi Midtrans: ' . $e->getMessage());
+                }
+
+                // Simpan token untuk dirender di frontend
+                DB::table('tb_transaksi')->where('id', $transaksiId)->update(['snap_token' => $snapToken]);
+
+            } else {
+                // QRIS DINAMIS
+                $qrisStatic = $paymentSettings['qris_statis_string'] ?? '';
+                if (empty($qrisStatic)) {
+                    throw new \Exception('QRIS Statis belum diatur oleh admin.');
+                }
+                
+                // Hapus CRC lama (4 digit terakhir, misal 6304XXXX)
+                // Asumsi standar EMVCo TLV: ID 63 panjang 04
+                $qrisBase = substr($qrisStatic, 0, -4);
+                
+                // Cek apakah string sudah ada Tag 54 (Nominal), jika ada kita harus replace, jika tidak tambahkan.
+                // Namun karena ini asumsinya dari QRIS statis DANA/Mandiri, biasanya tidak ada tag 54.
+                // Kita akan sisipkan Tag 54 sebelum Tag 63 (bisa juga sebelum 58 Country Code jika fleksibel)
+                // Paling aman: potong di sebelum '6304' (yang di-substr di atas biasanya sudah men-drop valuenya saja jika panjangnya n, tapi amannya buang '6304XXXX' lalu pasang lagi)
+                // Format: 63 (Tag) + 04 (Length) + Val
+                $pos6304 = strrpos($qrisStatic, '6304');
+                if ($pos6304 !== false) {
+                    $qrisWithoutCrc = substr($qrisStatic, 0, $pos6304);
+                } else {
+                    $qrisWithoutCrc = $qrisBase; // Fallback
+                }
+                
+                // Tambahkan Tag 54 (Transaction Amount)
+                $amountStr = (string)$midtransGrossAmount;
+                $amountLen = str_pad(strlen($amountStr), 2, '0', STR_PAD_LEFT);
+                $tag54 = "54{$amountLen}{$amountStr}";
+                
+                $newQrisBase = $qrisWithoutCrc . $tag54 . "6304";
+                
+                // Kalkulasi CRC16-CCITT
+                $crc = 0xFFFF;
+                for ($i = 0; $i < strlen($newQrisBase); $i++) {
+                    $x = (($crc >> 8) ^ ord($newQrisBase[$i])) & 0xFF;
+                    $x ^= $x >> 4;
+                    $crc = (($crc << 8) ^ ($x << 12) ^ ($x << 5) ^ ($x)) & 0xFFFF;
+                }
+                $crcHex = strtoupper(str_pad(dechex($crc), 4, '0', STR_PAD_LEFT));
+                
+                $dynamicQris = $newQrisBase . $crcHex;
+                
+                // Simpan QRIS string ke snap_token untuk diakses halaman success
+                DB::table('tb_transaksi')->where('id', $transaksiId)->update(['snap_token' => $dynamicQris]);
             }
-
-            $checkoutUrl = $danaResult['checkout_url'];
-
-            // Gunakan kolom snap_token untuk menyimpan URL pembayaran DANA sementara waktu
-            DB::table('tb_transaksi')->where('id', $transaksiId)->update(['snap_token' => $checkoutUrl]);
 
             DB::commit();
             return response()->json([
@@ -860,6 +927,29 @@ class PageController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Kesalahan Sistem: ' . $e->getMessage()], 500);
         }
     }
+
+    public function checkoutSuccess(Request $request)
+    {
+        $orderId = $request->query('order_id');
+        if (!$orderId) {
+            return redirect('/')->with('error', 'Pesanan tidak ditemukan');
+        }
+
+        $transaksi = DB::table('tb_transaksi')->where('kode_invoice', $orderId)->first();
+        if (!$transaksi) {
+            return redirect('/')->with('error', 'Pesanan tidak ditemukan');
+        }
+
+        $paymentSettings = DB::table('tb_pengaturan')
+            ->whereIn('setting_nama', ['payment_gateway', 'admin_wa_number'])
+            ->pluck('setting_nilai', 'setting_nama');
+
+        $paymentGateway = $paymentSettings['payment_gateway'] ?? 'qris_dinamis';
+        $waAdmin = $paymentSettings['admin_wa_number'] ?? '';
+
+        return view('pages.checkout-success', compact('transaksi', 'paymentGateway', 'waAdmin'));
+    }
+
     // =================================================================
     // 9.5 MIDTRANS WEBHOOK / FRONTEND CALLBACK (Status Pembayaran)
     // =================================================================

@@ -135,6 +135,7 @@
                         ['id' => 'general', 'icon' => 'mdi-store-cog-outline', 'label' => 'Identitas & Umum'],
                         ['id' => 'frontend', 'icon' => 'mdi-monitor-dashboard', 'label' => 'Tampilan Website'],
                         ['id' => 'finance', 'icon' => 'mdi-cash-multiple', 'label' => 'Keuangan & Biaya'],
+                        ['id' => 'payment', 'icon' => 'mdi-credit-card-outline', 'label' => 'Gerbang Pembayaran'],
                         ['id' => 'api', 'icon' => 'mdi-code-json', 'label' => 'API & Integrasi'],
                         ['id' => 'catalog', 'icon' => 'mdi-shape-outline', 'label' => 'Aturan Katalog']
                     ];
@@ -562,7 +563,71 @@
                         <p class="text-[10px] font-bold text-slate-400 mt-2 mb-0 ml-1">Dapatkan API Key di <a href="https://biteship.com/" target="_blank" class="text-emerald-500 hover:underline">Dashboard Biteship</a> Anda.</p>
                     </div>
                 </div>
+            </div>
 
+            {{-- PANEL: GERBANG PEMBAYARAN --}}
+            <div class="tab-pane fade" id="panel-payment" role="tabpanel">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-6 lg:p-8 shadow-sm transition-colors duration-300">
+                    <div class="border-b border-slate-100 dark:border-slate-800 pb-5 mb-6">
+                        <h3 class="text-xl font-black text-slate-800 dark:text-white m-0 flex items-center gap-2"><i class="mdi mdi-credit-card-outline text-emerald-500"></i> Gateway Pembayaran</h3>
+                        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 mb-0">Atur metode pembayaran aktif antara QRIS Dinamis (Native) atau Payment Gateway Midtrans.</p>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Metode Pembayaran Utama</label>
+                        <select name="payment_gateway" class="form-select w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-emerald-500/20">
+                            <option value="qris_dinamis" {{ ($settings['payment_gateway'] ?? '') == 'qris_dinamis' ? 'selected' : '' }}>QRIS Dinamis (Generate dari QR Statis DANA/Mandiri)</option>
+                            <option value="midtrans" {{ ($settings['payment_gateway'] ?? '') == 'midtrans' ? 'selected' : '' }}>Midtrans (Payment Gateway Resmi)</option>
+                        </select>
+                    </div>
+
+                    {{-- QRIS Dinamis Settings --}}
+                    <div class="p-5 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-2xl mb-8">
+                        <h4 class="text-sm font-black text-blue-800 dark:text-blue-300 mb-4 flex items-center gap-2"><i class="mdi mdi-qrcode-scan"></i> Pengaturan QRIS Dinamis</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">String QRIS Statis Asli</label>
+                                <textarea name="qris_statis_string" rows="3" class="form-control-custom w-full p-3 bg-white border border-blue-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-mono text-xs" placeholder="Paste kode TLV QRIS asli di sini...">{{ $settings['qris_statis_string'] ?? '' }}</textarea>
+                                <p class="text-[10px] font-bold text-slate-500 mt-1 ml-1">Penting: Sistem akan otomatis menyisipkan nominal tagihan (Tag 54) dan menghitung ulang CRC (Tag 63) dari string mentahan ini.</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 ml-1">Nomor WhatsApp Admin (Penerima Konfirmasi)</label>
+                                <input type="text" name="admin_wa_number" value="{{ $settings['admin_wa_number'] ?? '' }}" class="form-control-custom w-full p-3 bg-white border border-blue-200 rounded-xl text-sm font-bold text-slate-800 placeholder-slate-400" placeholder="Format: 62812xxx">
+                                <p class="text-[10px] font-bold text-slate-500 mt-1 ml-1">Pembeli akan diarahkan mengirim chat WA ke nomor ini setelah scan QRIS.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Midtrans Settings --}}
+                    <div class="p-5 bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700 rounded-2xl">
+                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2"><i class="mdi mdi-shield-check"></i> Kredensial Midtrans</h4>
+                        
+                        <div class="flex justify-between items-center p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl mb-4">
+                            <div>
+                                <strong class="block text-sm font-black text-slate-800 dark:text-white mb-1">Production Mode (Live)</strong>
+                                <span class="text-[11px] font-bold text-slate-500 leading-tight">Aktifkan jika menggunakan API Key Production (Uang Asli). Matikan untuk Sandbox (Testing).</span>
+                            </div>
+                            <div>
+                                <input type="checkbox" class="toggle-checkbox" id="midtransToggle" name="midtrans_is_production" value="1" {{ ($settings['midtrans_is_production'] ?? '0') == '1' ? 'checked' : '' }}>
+                                <label for="midtransToggle" class="toggle-label m-0"></label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Server Key</label>
+                                <input type="text" name="midtrans_server_key" value="{{ $settings['midtrans_server_key'] ?? '' }}" class="form-control-custom w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 ml-1">Client Key</label>
+                                <input type="text" name="midtrans_client_key" value="{{ $settings['midtrans_client_key'] ?? '' }}" class="form-control-custom w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 font-mono">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
             {{-- 5. PANEL: ATURAN KATALOG --}}
