@@ -311,12 +311,10 @@ Route::prefix('portal-rahasia-pks')->name('admin.')->middleware(['admin'])->grou
 
     // Dashboard & Leaderboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('dashboard')
-        ->middleware('admin.role:super,finance,cs');
+        ->name('dashboard');
 
     Route::get('/dashboard/top-stores', [AdminDashboardController::class, 'topStores'])
-        ->name('dashboard.top_stores')
-        ->middleware('admin.role:super,finance,cs');
+        ->name('dashboard.top_stores');
 
     Route::get('/api-monitor', [AdminApiMonitorController::class, 'index'])
         ->name('api_monitor')

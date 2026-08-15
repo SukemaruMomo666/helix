@@ -18,13 +18,16 @@ class CheckAdminRole
             abort(403, 'Akses Ditolak! Anda bukan Admin.');
         }
 
+        // Jika admin_role kosong (akun admin lama/pertama), anggap sebagai super admin
+        $role = $user->admin_role ?: 'super';
+
         // 2. Super Admin bisa tembus semua gerbang
-        if ($user->admin_role === 'super') {
+        if ($role === 'super') {
             return $next($request);
         }
 
         // 3. Cek apakah role admin saat ini diizinkan masuk ke rute ini
-        if (in_array($user->admin_role, $roles)) {
+        if (in_array($role, $roles)) {
             return $next($request);
         }
 
