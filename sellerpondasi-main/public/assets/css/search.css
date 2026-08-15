@@ -1,0 +1,318 @@
+/* ============================================================
+   CSS SEARCH PAGE - CLEAN CORPORATE THEME (HITAM-PUTIH-BIRU)
+   ============================================================ */
+
+/* --- 1. VARIABLES & RESET --- */
+:root {
+    --primary: #007bff;        /* Biru Utama */
+    --primary-dark: #0056b3;   /* Biru Gelap (Hover) */
+    --text-dark: #212529;      /* Hitam Teks */
+    --text-grey: #6c757d;      /* Abu Teks */
+    --bg-light: #f4f6f9;       /* Background Halaman */
+    --white: #ffffff;
+    --border: #dee2e6;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+    --shadow-md: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+}
+
+/* --- 2. LAYOUT CONTAINER --- */
+.page-wrapper {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: flex;
+    gap: 30px;
+    position: relative;
+    min-height: 80vh;
+}
+
+/* --- 3. SIDEBAR FILTER (DESKTOP) --- */
+.sidebar-filter {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--white);
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    height: fit-content;
+    position: sticky;
+    top: 90px; /* Jarak dari navbar fixed */
+    z-index: 90;
+}
+
+.close-filter { display: none; } /* Sembunyikan tombol X di desktop */
+
+.filter-section {
+    margin-bottom: 25px;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 20px;
+}
+
+.filter-section:last-child { border-bottom: none; }
+
+.filter-title {
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Checkbox Styling */
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-grey);
+    transition: color 0.2s;
+}
+
+.checkbox-group label:hover { color: var(--primary); }
+
+.checkbox-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* Input Harga Styling */
+.price-inputs {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.form-control-sm {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-control-sm:focus { border-color: var(--primary); }
+
+/* Tombol Terapkan */
+.btn-apply {
+    width: 100%;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+
+.btn-apply:hover { background: var(--primary-dark); }
+
+/* --- 4. PRODUCT GRID AREA --- */
+.main-content { flex: 1; width: 100%; }
+
+/* Header Hasil Pencarian */
+.result-header {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--white);
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.result-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.result-header span { font-size: 0.9rem; color: var(--text-grey); }
+
+/* Grid System */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+/* --- 5. PRODUCT CARD (KONSISTEN) --- */
+.product-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-body {
+    padding: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-category {
+    font-size: 0.7rem;
+    color: #aaa;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    line-height: 1.4;
+    color: var(--text-dark);
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Batasi 2 baris */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: auto;
+}
+
+.card-stock {
+    font-size: 0.8rem;
+    color: var(--text-grey);
+    margin-top: 5px;
+}
+
+.card-store {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-top: 10px;
+    border-top: 1px dashed #eee;
+}
+
+/* --- 6. EMPTY STATE --- */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--white);
+    border-radius: 10px;
+    border: 1px dashed var(--border);
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
+.empty-state i { font-size: 3rem; color: #e9ecef; margin-bottom: 15px; }
+.empty-state p { color: var(--text-grey); font-size: 1.1rem; margin-bottom: 20px; }
+
+/* --- 7. MOBILE RESPONSIVE --- */
+.mobile-filter-btn { display: none; } /* Default sembunyi */
+
+@media (max-width: 768px) {
+    .page-wrapper {
+        flex-direction: column;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    /* Tombol Filter Mobile Muncul */
+    .mobile-filter-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        color: var(--text-dark);
+        cursor: pointer;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    /* Sidebar jadi Off-Canvas (Muncul dari kiri) */
+    .sidebar-filter {
+        position: fixed;
+        top: 0;
+        left: -100%; /* Sembunyi di kiri */
+        width: 85%;
+        height: 100vh;
+        z-index: 2000;
+        overflow-y: auto;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+        border-radius: 0;
+        border: none;
+    }
+
+    .sidebar-filter.active { left: 0; } /* Muncul */
+
+    /* Tombol Close di Sidebar Mobile */
+    .close-filter {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #aaa;
+    }
+
+    /* Overlay Gelap */
+    .filter-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 1999; display: none;
+    }
+    .filter-overlay.active { display: block; }
+
+    /* Grid di HP */
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 Kolom */
+        gap: 10px;
+    }
+
+    .card-img { height: 140px; }
+    .card-body { padding: 10px; }
+    .card-title { font-size: 0.9rem; }
+    .card-price { font-size: 1rem; }
+}

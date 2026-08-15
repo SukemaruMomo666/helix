@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.6
+    container_name: pondasikita_db
+    restart: always
+    environment:
+      # Password root untuk databasenya (bebas, misalnya: root)
+      MYSQL_ROOT_PASSWORD: root
+      # Nama database yang akan otomatis dibuat
+      MYSQL_DATABASE: db_pondasikita
+    ports:
+      # Menghubungkan port laptop (kiri) ke port dalam Docker (kanan)
+      - "3306:3306"
+    volumes:
+      # PENTING: Ganti 'nama_file_hasil_ekstrak.sql' dengan nama file aslimu!
+      # Bagian kanan (/docker-entrypoint...) adalah folder ajaib Docker, JANGAN diubah.
+      - ./u479303946_pondasikita_db.sql:/docker-entrypoint-initdb.d/init.sql

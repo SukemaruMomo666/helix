@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API Model Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-100 p-4 md:p-8 font-sans">
+
+    <div class="max-w-5xl mx-auto bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+        <h1 class="text-2xl font-black text-slate-800 mb-2">Gemini API Model Explorer 🔍</h1>
+        <p class="text-sm text-slate-500 mb-6">Cek semua daftar Model (AI) yang tersedia dan bisa digunakan di dalam API Key Google Gemini kamu.</p>
+
+        <!-- Config Section -->
+        <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1 w-full">
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Google Gemini API Key:</label>
+                <input type="text" id="apiKey" placeholder="Masukkan API Key kamu di sini..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono">
+            </div>
+            <button onclick="fetchModels()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md transition-all shrink-0">
+                Cek Daftar Model 🚀
+            </button>
+        </div>
+
+        <div id="loading" class="hidden items-center justify-center gap-3 text-blue-600 font-bold text-sm my-8">
+            <div class="loader"></div> Mengambil data model dari server Google...
+        </div>
+
+        <div id="errorBox" class="hidden bg-red-50 text-red-600 p-4 rounded-lg border border-red-200 text-sm font-bold mb-6"></div>
+
+        <!-- Table Data -->
+        <div id="tableContainer" class="hidden overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-900 text-white text-xs uppercase tracking-wider">
+                        <th class="p-4 font-bold">Nama Model</th>
+                        <th class="p-4 font-bold">Tampilan (Display Name)</th>
+                        <th class="p-4 font-bold">Metode Yang Didukung</th>
+                        <th class="p-4 font-bold">Deskripsi</th>
+                    </tr>
+                </thead>
+                <tbody id="modelTableBody" class="text-sm text-slate-700 divide-y divide-slate-200 bg-white">
+                    <!-- Data masuk ke sini -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        async function fetchModels() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const errorBox = document.getElementById('errorBox');
+            const loading = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+            const tbody = document.getElementById('modelTableBody');
+
+            errorBox.classList.add('hidden');
+            tableContainer.classList.add('hidden');
+            
+            if (!apiKey) {
+                errorBox.textContent = "API Key tidak boleh kosong!";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+            tbody.innerHTML = '';
+
+            try {
+                // Endpoint untuk melist semua model Gemini
+                const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || "Gagal menghubungi server Google.");
+                }
+
+                if (data.models && data.models.length > 0) {
+                    data.models.forEach(model => {
+                        // Menyatukan daftar metode yang didukung (generateText, generateContent, dll)
+                        const methods = model.supportedGenerationMethods.map(m => 
+                            `<span class="inline-block bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded font-bold mr-1 mb-1">${m}</span>`
+                        ).join('');
+
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 transition-colors";
+                        tr.innerHTML = `
+                            <td class="p-4 font-mono font-bold text-blue-600">${model.name.replace('models/', '')}</td>
+                            <td class="p-4 font-bold text-slate-800">${model.displayName || '-'}</td>
+                            <td class="p-4">${methods}</td>
+                            <td class="p-4 text-xs text-slate-500 leading-relaxed max-w-xs">${model.description}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    
+                    tableContainer.classList.remove('hidden');
+                } else {
+                    errorBox.textContent = "Tidak ada model yang ditemukan untuk API Key ini.";
+                    errorBox.classList.remove('hidden');
+                }
+
+            } catch (error) {
+                errorBox.textContent = "❌ ERROR: " + error.message;
+                errorBox.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+                loading.classList.remove('flex');
+            }
+        }
+    </script>
+</body>
+</html>

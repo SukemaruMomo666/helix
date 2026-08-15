@@ -1,0 +1,708 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
+use App\Models\User;
+use App\Models\Toko;
+
+class AuthController extends Controller
+{
+    // ==========================================================
+    // 1. HALAMAN LOGIN (CUSTOMER)
+    // ==========================================================
+    public function showLogin()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->level === 'admin') {
+                return redirect()->intended('https://adminpro.pondasikita.com/admin/dashboard');
+            }
+            return redirect()->intended('/');
+        }
+
+        $throttleKey = request()->ip();
+        $sisaDetik = 0;
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $sisaDetik = RateLimiter::availableIn($throttleKey);
+        }
+
+        return view('auth.login_customer', compact('sisaDetik'));
+    }
+
+    // ==========================================================
+    // 2. HALAMAN LOGIN (SELLER)
+    // ==========================================================
+    public function showLoginSeller()
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->level === 'admin') {
+                return redirect()->intended('https://adminpro.pondasikita.com/admin/dashboard');
+            }
+            return redirect()->intended('/');
+        }
+
+        $throttleKey = request()->ip();
+        $sisaDetik = 0;
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $sisaDetik = RateLimiter::availableIn($throttleKey);
+        }
+
+        return view('auth.login_seller', compact('sisaDetik'));
+    }
+
+    // ==========================================================
+    // LOGIN ADMIN
+    // ==========================================================
+    public function showLoginAdmin()
+    {
+        if (Auth::check() && Auth::user()->level === 'admin') {
+            return redirect('/admin/dashboard');
+        }
+
+        return view('auth.login_admin');
+    }
+
+    public function loginAdmin(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
+        $loginType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $loginType => $request->username,
+            'password' => $request->password,
+            'level'    => 'admin' 
+        ];
+
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            $user = Auth::user();
+
+            // CEK STATUS BAN
+            if ($user->is_banned) {
+                if ($user->banned_until && $user->banned_until->isPast()) {
+                    // MASA BAN SUDAH HABIS - AKTIFKAN OTOMATIS
+                    $user->is_banned = false;
+                    $user->ban_type = 'none';
+                    $user->ban_reason = null;
+                    $user->banned_until = null;
+                    $user->save();
+                } elseif ($user->ban_type === 'berat') {
+                    Auth::logout();
+                    $reason = $user->ban_reason ?? 'Pelanggaran ketentuan layanan.';
+                    $until = $user->banned_until ? " hingga " . $user->banned_until->format('d M Y H:i') : " permanen";
+                    $appealLink = '<a href="https://wa.me/6285156677227" class="underline font-bold" target="_blank">Hubungi Super Admin</a>';
+                    return back()->with('error', "AKUN DIBLOKIR PERMANEN! Akun Anda ditangguhkan{$until}. Alasan: {$reason} - {$appealLink}")->withInput();
+                }
+                // Jika ban_type == 'ringan', biarkan login tapi nanti tampilkan alert di dashboard
+            }
+
+            $request->session()->regenerate();
+            return redirect()->intended('/admin/dashboard');
+        }
+
+        $userExists = User::where($loginType, $request->username)->first();
+        if ($userExists && $userExists->level !== 'admin') {
+            return back()->with('error', 'Akses ditolak! Akun ini bukan akun Admin.')->withInput();
+        }
+
+        return back()->with('error', 'Username atau Password salah.')->withInput();
+    }
+
+    // ==========================================================
+    // 3. PROSES LOGIN (UMUM: CUSTOMER)
+    // ==========================================================
+    public function login(Request $request)
+    {
+        $throttleKey = $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->with('error', "Terlalu banyak percobaan. Coba lagi dalam $seconds detik.");
+        }
+
+        $request->validate([
+            'username' => 'required', 
+            'password' => 'required',
+        ]);
+
+        $inputType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $inputType => $request->username,
+            'password' => $request->password,
+        ];
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // CEK STATUS BAN
+            if ($user->is_banned) {
+                if ($user->banned_until && $user->banned_until->isPast()) {
+                    // MASA BAN SUDAH HABIS - AKTIFKAN OTOMATIS
+                    $user->is_banned = false;
+                    $user->ban_type = 'none';
+                    $user->ban_reason = null;
+                    $user->banned_until = null;
+                    $user->save();
+                    
+                    // Jika seller, aktifkan tokonya juga
+                    if ($user->level === 'seller') {
+                        DB::table('tb_toko')->where('user_id', $user->id)->update(['status' => 'active']);
+                    }
+                } elseif ($user->ban_type === 'berat') {
+                    Auth::logout();
+                    $reason = $user->ban_reason ?? 'Pelanggaran ketentuan layanan.';
+                    $until = $user->banned_until ? " hingga " . $user->banned_until->format('d M Y H:i') : " (Permanen)";
+                    $appealLink = '<a href="https://wa.me/6285156677227" class="underline font-bold" target="_blank">Hubungi CS Pondasikita</a>';
+                    return back()->with('error', "AKUN DIBLOKIR BERAT! {$until}. Alasan: {$reason} - Ajukan Banding: {$appealLink}")->withInput();
+                }
+                // Jika ringan, izinkan login
+            }
+
+            $request->session()->regenerate();
+            RateLimiter::clear($throttleKey); 
+
+            if ($user->level === 'admin') {
+                return redirect()->intended('https://adminpro.pondasikita.com/admin/dashboard');
+            } else {
+                return redirect()->intended('/'); 
+            }
+        }
+
+        RateLimiter::hit($throttleKey); 
+        return back()->with('error', 'Username atau Password salah.');
+    }
+
+    // ==========================================================
+    // 3B. PROSES LOGIN KHUSUS SELLER
+    // ==========================================================
+    public function loginSeller(Request $request)
+    {
+        $throttleKey = $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->with('error', "Terlalu banyak percobaan. Coba lagi dalam $seconds detik.");
+        }
+
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
+        $loginType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $loginType => $request->username,
+            'password' => $request->password
+        ];
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // CEK STATUS BAN
+            if ($user->is_banned) {
+                if ($user->banned_until && $user->banned_until->isPast()) {
+                    // MASA BAN SUDAH HABIS - AKTIFKAN OTOMATIS
+                    $user->is_banned = false;
+                    $user->ban_type = 'none';
+                    $user->ban_reason = null;
+                    $user->banned_until = null;
+                    $user->save();
+                    
+                    // Aktifkan tokonya juga
+                    DB::table('tb_toko')->where('user_id', $user->id)->update(['status' => 'active']);
+                } elseif ($user->ban_type === 'berat') {
+                    Auth::logout();
+                    $reason = $user->ban_reason ?? 'Pelanggaran kebijakan seller.';
+                    $until = $user->banned_until ? " hingga " . $user->banned_until->format('d M Y H:i') : " (Permanen)";
+                    $appealLink = '<a href="https://wa.me/6285156677227" class="underline font-bold" target="_blank">Hubungi CS Pondasikita</a>';
+                    return redirect()->route('seller.login')->with('error', "AKUN SELLER DIBLOKIR BERAT! {$until}. Alasan: {$reason} - Ajukan Banding: {$appealLink}")->withInput();
+                }
+                // Jika ringan, izinkan login
+            }
+
+            // Pastikan yang login benar-benar seller
+            if ($user->level === 'seller') {
+                $request->session()->regenerate();
+                RateLimiter::clear($throttleKey);
+                return redirect()->route('seller.dashboard')->with('success', 'Selamat datang kembali di Pondasikita Seller Centre!');
+            } else {
+                Auth::logout();
+                return redirect()->route('seller.login')->with('error', 'Akun Anda bukan Penjual. Silakan daftar toko terlebih dahulu.');
+            }
+        }
+
+        RateLimiter::hit($throttleKey);
+        return back()->with('error', 'Email/Username atau Kata Sandi salah!');
+    }
+
+    // ==========================================================
+    // 4. PROSES LOGOUT
+    // ==========================================================
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/login');
+    }
+    
+    public function logoutSeller(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/seller/login');
+    }
+
+    // ==========================================================
+    // 5. REGISTER CUSTOMER
+    // ==========================================================
+    public function showRegister()
+    {
+        if (Auth::check()) {
+            return redirect()->route('home');
+        }
+        return view('auth.register_customer');
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'nama'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:tb_user,email', 
+            'username' => 'required|string|unique:tb_user,username',
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+            'otp'      => 'required|numeric',
+        ], [
+            'username.unique'    => 'Nama pengguna ini sudah dipakai.',
+            'email.unique'       => 'Email ini sudah terdaftar, silakan login.',
+            'password.min'       => 'Kata sandi minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            'password.letters'   => 'Kata sandi harus mengandung huruf.',
+            'password.mixed'     => 'Kata sandi harus mengandung huruf besar dan kecil.',
+            'password.numbers'   => 'Kata sandi harus mengandung angka.',
+            'password.symbols'   => 'Kata sandi harus mengandung simbol.',
+            'otp.required'       => 'Kode OTP wajib diisi.'
+        ]);
+
+        if ($request->otp != session('register_otp') || $request->email != session('register_otp_email')) {
+            return back()->with('error', 'Kode OTP tidak valid atau email tidak sesuai.')->withInput();
+        }
+
+        if (now()->diffInMinutes(session('register_otp_time')) > 5) {
+            return back()->with('error', 'Kode OTP telah kedaluwarsa. Silakan kirim ulang.')->withInput();
+        }
+
+        session()->forget(['register_otp', 'register_otp_email', 'register_otp_time']);
+
+        User::create([
+            'nama'        => $request->nama,
+            'email'       => $request->email,
+            'username'    => $request->username,
+            'password'    => Hash::make($request->password),
+            'level'       => 'customer',
+            'status'      => 'offline',
+            'is_verified' => 1,
+            'is_banned'   => 0
+        ]);
+
+        return redirect()->back()->with('success', 'Akun Anda berhasil dibuat. Silakan login untuk mulai berbelanja.');
+    }
+
+    public function sendOtpRegister(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:tb_user,email'
+        ]);
+
+        $otp = rand(100000, 999999);
+        session([
+            'register_otp' => $otp,
+            'register_otp_email' => $request->email,
+            'register_otp_time' => now()
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($request->email)->send(new \App\Mail\OtpRegistrationMail($otp));
+            return response()->json(['success' => true, 'message' => 'OTP telah dikirim ke ' . $request->email]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal mengirim email: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // ==========================================================
+    // 6. REGISTER SELLER (DIPERBAIKI UNTUK BITESHIP & GPS)
+    // ==========================================================
+    public function showRegisterSeller()
+    {
+        // Tidak perlu lagi manggil $provinces karena pakai fitur Live Search Biteship
+        return view('auth.register_seller');
+    }
+
+    public function registerSeller(Request $request)
+    {
+        // Validasi diubah: Dulu minta province_id dkk, sekarang minta area_id
+        $request->validate([
+            'nama_pemilik' => 'required|string|max:255',
+            'username'     => 'required|string|max:50|unique:tb_user,username',
+            'email'        => 'required|email|unique:tb_user,email',
+            'password'     => 'required|min:6',
+            'telepon_toko' => 'required|numeric', 
+            'nama_toko'    => 'required|string|max:100|unique:tb_toko,nama_toko',
+            'alamat_toko'  => 'required|string',
+            'area_id'      => 'required|string', // Kunci dari Biteship
+            'latitude'     => 'nullable|string', // Kunci untuk jarak GPS toko terdekat
+            'longitude'    => 'nullable|string', 
+            'logo_toko'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ], [
+            'area_id.required' => 'Wilayah kecamatan/kelurahan wajib diisi melalui pilihan otomatis.'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $logoPath = null;
+            if ($request->hasFile('logo_toko')) {
+                $file = $request->file('logo_toko');
+                $filename = time() . '_' . Str::slug($request->nama_toko) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/toko'), $filename); 
+                $logoPath = $filename;
+            }
+
+            $user = User::create([
+                'nama'        => $request->nama_pemilik,
+                'username'    => $request->username,
+                'email'       => $request->email,
+                'password'    => Hash::make($request->password),
+                'no_telepon'  => $request->telepon_toko, 
+                'level'       => 'seller',
+                'status'      => 'offline',
+                'is_verified' => 1, 
+                'is_banned'   => 0
+            ]);
+
+            $slug = Str::slug($request->nama_toko);
+            if (Toko::where('slug', $slug)->exists()) {
+                $slug .= '-' . time();
+            }
+
+            // Simpan toko dengan Area ID dan GPS
+            Toko::create([
+                'user_id'            => $user->id,
+                'nama_toko'          => $request->nama_toko,
+                'slug'               => $slug,
+                'telepon_toko'       => $request->telepon_toko,
+                'alamat_toko'        => $request->alamat_toko,
+                'area_id'            => $request->area_id, // Masuk ke Biteship
+                'latitude'           => $request->latitude, // Masuk ke GPS Maps
+                'longitude'          => $request->longitude,
+                'logo_toko'          => $logoPath,
+                'status'             => 'active', 
+                'status_operasional' => 'Buka'
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('seller.login')->with('success', 'Pendaftaran Toko Berhasil! Akun Seller Anda sudah aktif, silakan masuk ke Seller Centre.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal mendaftar: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    // ==========================================================
+    // 7. API WILAYAH (AJAX) - DIBEKUKAN / KOSONGKAN SAJA
+    // ==========================================================
+    public function getCities($provinceId)
+    {
+        return response()->json([]);
+    }
+
+    public function getDistricts($cityId)
+    {
+        return response()->json([]);
+    }
+
+    // ==========================================================
+    // 8. LOGIN GOOGLE OAUTH
+    // ==========================================================
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+            $existingUser = User::where('email', $googleUser->getEmail())->first();
+
+            if ($existingUser) {
+                // CEK STATUS BAN
+                if ($existingUser->is_banned) {
+                    if ($existingUser->banned_until && $existingUser->banned_until->isPast()) {
+                        $existingUser->update(['is_banned' => false, 'ban_type' => 'none', 'ban_reason' => null, 'banned_until' => null]);
+                    } elseif ($existingUser->ban_type === 'berat') {
+                        $reason = $existingUser->ban_reason ?? 'Pelanggaran ketentuan layanan.';
+                        $until = $existingUser->banned_until ? " hingga " . $existingUser->banned_until->format('d M Y H:i') : " (Permanen)";
+                        return redirect()->route('login')->with('error', "AKUN DIBLOKIR BERAT! {$until}. Alasan: {$reason}");
+                    }
+                }
+
+                $updateData = ['google_id' => $googleUser->getId(), 'is_verified' => 1];
+                
+                // Jika user belum punya foto profil, download dari Google
+                if (empty($existingUser->profile_picture_url) || $existingUser->profile_picture_url === 'person.png') {
+                    $avatar = $this->downloadGoogleAvatar($googleUser->getAvatar(), $googleUser->getId());
+                    if ($avatar) {
+                        $updateData['profile_picture_url'] = $avatar;
+                    }
+                }
+
+                $existingUser->update($updateData);
+                Auth::loginUsingId($existingUser->id);
+            } else {
+                $avatar = $this->downloadGoogleAvatar($googleUser->getAvatar(), $googleUser->getId());
+                $cleanUsername = $this->generateCleanUsername($googleUser->getName());
+
+                $newUserId = DB::table('tb_user')->insertGetId([
+                    'nama' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'username' => $cleanUsername,
+                    'google_id' => $googleUser->getId(),
+                    'profile_picture_url' => $avatar,
+                    'level' => 'customer',
+                    'password' => Hash::make(Str::random(24)),
+                    'status' => 'online',
+                    'is_verified' => 1,
+                    'is_banned' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                Auth::loginUsingId($newUserId);
+            }
+
+            return redirect()->route('home')->with('success', 'Berhasil masuk menggunakan Google!');
+
+        } catch (\Exception $e) {
+            return redirect()->route('login')->with('error', 'Login Google dibatalkan atau gagal.');
+        }
+    }
+
+    // ==========================================================
+    // 9. API LOGIN UNTUK REACT NATIVE (SANCTUM)
+    // ==========================================================
+    public function loginApi(Request $request)
+    {
+        // 1. Validasi input dari React Native
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
+        // 2. Cek apakah yang diinput itu format Email atau Username
+        $loginType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        // 3. Cari user di database
+        $user = User::where($loginType, $request->username)->first();
+
+        // 4. Jika user tidak ketemu atau password salah
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email/Username atau Password salah!'
+            ], 401);
+        }
+
+        // 5. Cek apakah akun di-banned (Opsional, menyesuaikan field di database)
+        if (isset($user->is_banned) && $user->is_banned == 1) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Akun Anda telah ditangguhkan.'
+            ], 403);
+        }
+
+        // 6. Buat Token Sanctum
+        $token = $user->createToken('MobileAppToken')->plainTextToken;
+
+        // 7. Kembalikan response JSON yang sesuai dengan yang diharapkan React Native
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Login Berhasil',
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'nama' => $user->nama,
+                'email' => $user->email,
+                'username' => $user->username,
+                'level' => $user->level
+            ]
+        ], 200);
+    }
+   // ==========================================================
+    // 10. API REGISTER UNTUK REACT NATIVE (SANCTUM)
+    // ==========================================================
+    public function registerApi(Request $request)
+    {
+        // 1. Tambahkan validasi no_telepon
+        $request->validate([
+            'nama'       => 'required|string|max:255',
+            'username'   => 'required|string|unique:tb_user,username',
+            'email'      => 'required|email|unique:tb_user,email',
+            'no_telepon' => 'required|string', // <-- BARIS INI DITAMBAHKAN
+            'password'   => 'required|min:8|confirmed',
+        ]);
+
+        // 2. Simpan no_telepon ke tabel tb_user
+        $user = User::create([
+            'nama'        => $request->nama,
+            'email'       => $request->email,
+            'username'    => $request->username,
+            'no_telepon'  => $request->no_telepon, // <-- BARIS INI DITAMBAHKAN
+            'password'    => Hash::make($request->password),
+            'level'       => 'customer',
+            'status'      => 'offline',
+            'is_verified' => 1,
+            'is_banned'   => 0
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Akun berhasil dibuat',
+            'user'    => $user
+        ], 201);
+    }
+    // ==========================================================
+    // 11. API LOGIN / REGISTER GOOGLE UNTUK REACT NATIVE
+    // ==========================================================
+    public function googleLoginApi(Request $request)
+    {
+        $request->validate([
+            'token' => 'required'
+        ]);
+
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if ($user) {
+                // CEK STATUS BAN
+                if ($user->is_banned) {
+                    if ($user->banned_until && $user->banned_until->isPast()) {
+                        $user->update(['is_banned' => false, 'ban_type' => 'none', 'ban_reason' => null, 'banned_until' => null]);
+                    } elseif ($user->ban_type === 'berat') {
+                        return response()->json(['status' => 'error', 'message' => 'Akun Anda telah ditangguhkan.'], 403);
+                    }
+                }
+
+                $updateData = ['google_id' => $googleUser->getId(), 'is_verified' => 1];
+                if (empty($user->profile_picture_url) || $user->profile_picture_url === 'person.png') {
+                    $avatar = $this->downloadGoogleAvatar($googleUser->getAvatar(), $googleUser->getId());
+                    if ($avatar) {
+                        $updateData['profile_picture_url'] = $avatar;
+                    }
+                }
+                $user->update($updateData);
+            } else {
+                $avatar = $this->downloadGoogleAvatar($googleUser->getAvatar(), $googleUser->getId());
+                $cleanUsername = $this->generateCleanUsername($googleUser->getName());
+
+                $user = User::create([
+                    'nama'        => $googleUser->getName(),
+                    'email'       => $googleUser->getEmail(),
+                    'username'    => $cleanUsername,
+                    'google_id'   => $googleUser->getId(),
+                    'profile_picture_url' => $avatar,
+                    'password'    => Hash::make(Str::random(24)),
+                    'level'       => 'customer',
+                    'status'      => 'online',
+                    'is_verified' => 1,
+                    'is_banned'   => 0
+                ]);
+            }
+
+            $token = $user->createToken('MobileAppToken')->plainTextToken;
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Berhasil masuk dengan Google',
+                'token'   => $token,
+                'user'    => [
+                    'id'       => $user->id,
+                    'nama'     => $user->nama,
+                    'email'    => $user->email,
+                    'username' => $user->username,
+                    'level'    => $user->level,
+                    'profile_picture_url' => $user->profile_picture_url
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error', 
+                'message' => 'Autentikasi Google gagal atau token kedaluwarsa.',
+                'error'   => $e->getMessage()
+            ], 401);
+        }
+    }
+
+    // ==========================================================
+    // HELPER FUNCTIONS UNTUK GOOGLE OAUTH
+    // ==========================================================
+    private function downloadGoogleAvatar($avatarUrl, $googleId)
+    {
+        if (!$avatarUrl) return null;
+
+        try {
+            $contents = Http::get($avatarUrl)->body();
+            $filename = 'google_' . $googleId . '_' . time() . '.jpg';
+            $path = public_path('assets/uploads/avatars/' . $filename);
+            
+            if (!File::exists(public_path('assets/uploads/avatars'))) {
+                File::makeDirectory(public_path('assets/uploads/avatars'), 0755, true);
+            }
+
+            File::put($path, $contents);
+            return $filename;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private function generateCleanUsername($name)
+    {
+        $baseUsername = Str::slug($name);
+        if (empty($baseUsername)) {
+            $baseUsername = 'user';
+        }
+        
+        $username = $baseUsername;
+        $counter = 1;
+
+        while (DB::table('tb_user')->where('username', $username)->exists()) {
+            $username = $baseUsername . '-' . $counter;
+            $counter++;
+        }
+
+        return $username;
+    }
+}
