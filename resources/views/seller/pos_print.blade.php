@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk POS - {{ $transaksi->kode_invoice }}</title>
     <style>
-        @page { margin: 0; size: 58mm auto; }
+        @page { margin: 0; size: 80mm auto; }
         body {
             font-family: 'Courier New', Courier, monospace;
             font-size: 11px;
@@ -14,8 +14,10 @@
             margin: 0;
             padding: 5px;
             background: #fff;
-            width: 58mm; /* Adjust for 58mm printer */
-            max-width: 100%;
+            width: 70mm; /* Safe printable area for 80mm paper */
+            box-sizing: border-box;
+            margin-left: auto;
+            margin-right: auto;
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
