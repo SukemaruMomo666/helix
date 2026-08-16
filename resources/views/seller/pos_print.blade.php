@@ -37,8 +37,18 @@
 </head>
 <body onload="window.print()">
     
+    <div class="divider" style="border-top: 2px solid #000; margin-bottom: 5px;"></div>
     <div class="text-center">
-        <div class="store-name">{{ $toko->nama_toko }}</div>
+        <div class="store-name" style="font-size: 16px;">SADAWARNA SMART CENTER</div>
+        <div class="store-info" style="font-size: 11px;">
+            Pusat Penjualan UMKM Desa Sadawarna<br>
+            Kec. Cibogo, Kab. Subang
+        </div>
+    </div>
+    <div class="divider" style="border-top: 1px solid #000; margin-top: 5px;"></div>
+    
+    <div class="text-center" style="margin-top: 10px;">
+        <div class="store-name" style="font-size: 14px;">{{ $toko->nama_toko }}</div>
         <div class="store-info">
             {{ $toko->alamat_toko }}<br>
             Telp: {{ $toko->telepon_toko }}
