@@ -6,17 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk POS - {{ $transaksi->kode_invoice }}</title>
     <style>
-        @page { margin: 0; }
+        @page { margin: 0; size: 58mm auto; }
         body {
             font-family: 'Courier New', Courier, monospace;
             font-size: 11px;
             color: #000;
             margin: 0;
-            padding: 10px;
+            padding: 5px;
             background: #fff;
-            width: 80mm;
-            margin-left: auto;
-            margin-right: auto;
+            width: 58mm; /* Adjust for 58mm printer */
+            max-width: 100%;
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
