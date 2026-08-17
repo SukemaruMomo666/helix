@@ -74,7 +74,7 @@
                         </li>
                         <li class="flex items-start gap-3 mt-4 text-xs leading-relaxed text-zinc-500">
                             <i class="fas fa-building mt-1 text-zinc-600"></i>
-                            Helix<br>
+                            Triple Helix Sadawarna<br>
                             Bendungan Sadawarna<br>
                             Desa Cibogo, Kab. Subang
                         </li>

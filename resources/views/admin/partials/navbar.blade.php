@@ -57,8 +57,8 @@
             <button @click="profileOpen = !profileOpen" @click.outside="profileOpen = false"
                     class="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-slate-600 dark:hover:bg-slate-700 hover:shadow-md transition-all duration-300 outline-none shadow-sm dark:shadow-none group">
 
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/30 group-hover:scale-105 group-hover:ring-2 ring-emerald-500/20 dark:ring-slate-600 transition-all duration-300">
-                    {{ strtoupper(substr(Auth::user()->nama ?? Auth::user()->name ?? 'A', 0, 1)) }}
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center p-1 shadow-md shadow-blue-500/30 group-hover:scale-105 group-hover:ring-2 ring-emerald-500/20 dark:ring-slate-600 transition-all duration-300">
+                    <img src="{{ asset('assets/logos/Logo Helix.png') }}" alt="Logo" class="w-full h-full object-contain">
                 </div>
 
                 <div class="hidden md:block text-left">

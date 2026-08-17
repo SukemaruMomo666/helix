@@ -55,8 +55,8 @@
             {{-- Tombol Profil --}}
             <button onclick="toggleProfileMenu()" class="flex items-center gap-3 p-1.5 pr-3 rounded-xl hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all group focus:outline-none">
                 {{-- Avatar --}}
-                <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 via-blue-600 to-orange-500 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-900/50">
-                    {{ strtoupper(substr(Auth::user()->nama ?? 'S', 0, 1)) }}
+                <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1 shadow-md shadow-blue-900/50 border border-slate-200">
+                    <img src="{{ asset('assets/logos/Logo Helix.png') }}" alt="Logo" class="w-full h-full object-contain">
                 </div>
 
                 {{-- Nama & Role (Sembunyi di layar kecil HP) --}}

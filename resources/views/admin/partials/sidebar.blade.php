@@ -17,13 +17,9 @@
          HEADER / BRANDING
          ========================================== --}}
     <div class="h-[70px] flex items-center px-6 border-b border-slate-200/60 dark:border-slate-800 relative z-20 flex-shrink-0 transition-colors duration-500">
-        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 outline-none group w-full text-decoration-none">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.2)] group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] ring-1 ring-white/10 transition-all duration-300">
-                <span class="text-white font-black text-lg font-mono">P</span>
-            </div>
-            <div class="flex flex-col">
-                <span class="text-slate-900 dark:text-white font-black text-base tracking-tight leading-tight group-hover:text-emerald-600 dark:group-hover:text-indigo-400 transition-colors">Helix</span>
-                <span class="text-[9px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-[0.25em] leading-tight opacity-80">Core Dashboard</span>
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group relative w-full mb-1">
+            <div class="w-10 h-10 flex items-center justify-center transition-all duration-300">
+                <img src="{{ asset('assets/logos/Logo Helix.png') }}" alt="Helix" class="w-full h-full object-contain drop-shadow-sm group-hover:scale-105 transition-transform">
             </div>
         </a>
     </div>

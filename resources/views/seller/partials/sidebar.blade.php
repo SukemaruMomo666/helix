@@ -3,13 +3,8 @@
     {{-- 1. BRAND LOGO --}}
     <div class="px-6 py-5 border-b border-slate-800 flex-shrink-0">
         <a href="{{ route('home') }}" class="flex items-center gap-3 group" title="Lihat Tampilan Toko">
-            {{-- Aksen biru terang untuk logo di dark mode --}}
-            <div class="w-9 h-9 bg-gradient-to-r from-emerald-600 via-blue-600 to-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-900/50 group-hover:scale-105 transition-transform">
-                <i class="mdi mdi-storefront text-xl"></i>
-            </div>
-            <div>
-                <h2 class="text-xl font-black text-white tracking-tight leading-none">Helix</h2>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Seller Center</span>
+            <div class="w-10 h-10 flex items-center justify-center transition-all duration-300">
+                <img src="{{ asset('assets/logos/Logo Helix.png') }}" alt="Helix" class="w-full h-full object-contain drop-shadow-sm group-hover:scale-105 transition-transform">
             </div>
         </a>
     </div>
