@@ -21,7 +21,7 @@
                 <div class="mt-4">
                     <h5 class="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-3">Didukung Oleh:</h5>
                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 bg-white/5 p-4 rounded-2xl border border-zinc-800">
-                        <img src="{{ asset('assets/logos/BIMA.png') }}" alt="BIMA" class="h-10 object-contain">
+                        <img src="{{ asset('assets/logos/BIMA.png') }}" alt="BIMA" class="h-16 object-contain">
                         <img src="{{ asset('assets/logos/DIKTISAITEK.png') }}" alt="DIKTISAITEK" class="h-10 object-contain">
                         <img src="{{ asset('assets/logos/polsub.png') }}" alt="Polsub" class="h-10 object-contain">
                         <img src="{{ asset('assets/logos/TUT WURI.png') }}" alt="Tut Wuri" class="h-10 object-contain">

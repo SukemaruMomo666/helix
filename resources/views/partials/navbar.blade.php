@@ -69,8 +69,8 @@
                 @if(Auth::user()->profile_picture_url)
                     <img src="{{ asset('assets/uploads/avatars/' . Auth::user()->profile_picture_url) }}" class="w-8 h-8 rounded-full object-cover shadow-inner" onerror="this.src='{{ asset('assets/uploads/avatars/person-icon-1680.png') }}'">
                 @else
-                    <div class="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center p-1 border border-emerald-100 shadow-inner">
-                        <img src="{{ asset('assets/logos/Logo Helix.png') }}" class="w-full h-full object-contain" alt="Logo">
+                    <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-black shadow-inner">
+                        {{ strtoupper(substr(Auth::user()->nama ?? 'U', 0, 1)) }}
                     </div>
                 @endif
                 <span class="text-xs font-bold text-zinc-700 group-hover:text-white transition-colors truncate max-w-[80px]">
@@ -114,8 +114,8 @@
                 @if(Auth::user()->profile_picture_url)
                     <img src="{{ asset('assets/uploads/avatars/' . Auth::user()->profile_picture_url) }}" class="w-14 h-14 rounded-2xl object-cover shadow-[0_0_20px_rgba(5,150,105,0.4)] border border-emerald-400/30" onerror="this.src='{{ asset('assets/uploads/avatars/person-icon-1680.png') }}'">
                 @else
-                    <div class="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-2 shadow-[0_0_20px_rgba(5,150,105,0.4)] border border-emerald-400/30">
-                        <img src="{{ asset('assets/logos/Logo Helix.png') }}" class="w-full h-full object-contain" alt="Logo">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white flex items-center justify-center text-2xl font-black shadow-[0_0_20px_rgba(5,150,105,0.4)] border border-emerald-400/30">
+                        {{ strtoupper(substr(Auth::user()->nama ?? 'U', 0, 1)) }}
                     </div>
                 @endif
                 <div class="flex flex-col">
