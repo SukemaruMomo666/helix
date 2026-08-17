@@ -14,8 +14,8 @@
             {{-- ================= KOLOM KIRI: LOGOS (5 Cols) ================= --}}
             <div class="lg:col-span-5 flex flex-col gap-6 items-center sm:items-start text-center sm:text-left">
                 <img src="{{ asset('assets/logos/Logo Helix.png') }}" alt="Helix Logo" class="h-14 w-auto drop-shadow-lg">
-                <p class="text-sm leading-relaxed text-zinc-400 max-w-sm">
-                    Platform Pusat Penjualan UMKM dan Pemberdayaan Desa Sadawarna.
+                <p class="text-sm leading-relaxed text-zinc-400 max-w-sm mt-2">
+                    Lebih dari sekadar platform penjualan, Helix hadir sebagai panggung pemberdayaan UMKM Desa Sadawarna. Kami menjembatani karya lokal yang lahir dari ketulusan dengan pembeli di seluruh nusantara, membangun ekosistem bisnis yang adil, berkelanjutan, dan penuh makna bagi kemajuan desa.
                 </p>
 
                 <div class="mt-4">
@@ -36,10 +36,10 @@
                 <div>
                     <h4 class="text-white font-black mb-6 uppercase tracking-widest text-xs">Jelajahi</h4>
                     <ul class="space-y-4 text-sm font-medium text-zinc-400">
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Beranda</a></li>
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Kategori Material</a></li>
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Daftar Mitra Toko</a></li>
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Promo Proyek</a></li>
+                        <li><a href="{{ route('home') }}" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Beranda</a></li>
+                        <li><a href="{{ url('pages/produk') }}" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Kategori Produk UMKM</a></li>
+                        <li><a href="{{ url('pages/toko') }}" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Daftar Mitra UMKM</a></li>
+                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Promo</a></li>
                         <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Helix Blog</a></li>
                     </ul>
                 </div>
@@ -48,10 +48,6 @@
                 <div>
                     <h4 class="text-white font-black mb-6 uppercase tracking-widest text-xs">Layanan</h4>
                     <ul class="space-y-4 text-sm font-medium text-zinc-400">
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Cara Pembayaran</a></li>
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Lacak Pengiriman</a></li>
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Kebijakan Retur 7 Hari</a></li>
-                        <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">Helix B2B</a></li>
                         <li><a href="#" class="hover:text-blue-400 hover:translate-x-1 inline-block transition-all duration-300">FAQ</a></li>
                     </ul>
                 </div>
