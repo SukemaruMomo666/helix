@@ -11,56 +11,20 @@
         {{-- MAIN CONTENT GRID --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 mb-20">
 
-            {{-- ================= KOLOM KIRI: APP PROMO (5 Cols) ================= --}}
-            <div class="lg:col-span-5 flex flex-col sm:flex-row gap-8 items-center sm:items-start text-center sm:text-left">
+            {{-- ================= KOLOM KIRI: LOGOS (5 Cols) ================= --}}
+            <div class="lg:col-span-5 flex flex-col gap-6 items-center sm:items-start text-center sm:text-left">
+                <img src="{{ asset('assets/logos/Logo Helix.png') }}" alt="Helix Logo" class="h-14 w-auto drop-shadow-lg">
+                <p class="text-sm leading-relaxed text-zinc-400 max-w-sm">
+                    Platform Pusat Penjualan UMKM dan Pemberdayaan Desa Sadawarna.
+                </p>
 
-                {{-- CSS Phone Mockup (Tanpa gambar eksternal) --}}
-                <div class="relative w-44 h-[310px] bg-zinc-950 rounded-[2.5rem] border-[6px] border-zinc-800 shadow-[0_0_30px_rgba(59,130,246,0.1)] overflow-hidden flex-shrink-0 flex flex-col group">
-                    {{-- Notch --}}
-                    <div class="absolute top-0 inset-x-0 h-4 bg-zinc-800 rounded-b-xl w-20 mx-auto z-20"></div>
-                    {{-- Screen --}}
-                    <div class="flex-1 bg-zinc-900 p-3 pt-8 flex flex-col gap-3 relative">
-                        {{-- App UI Abstract --}}
-                        <div class="w-full h-8 bg-zinc-800 rounded-md"></div>
-                        <div class="w-2/3 h-4 bg-zinc-800 rounded-md"></div>
-                        <div class="grid grid-cols-2 gap-2 mt-2">
-                            <div class="w-full h-16 bg-zinc-800/50 rounded-lg group-hover:bg-blue-600/20 transition-colors"></div>
-                            <div class="w-full h-16 bg-zinc-800/50 rounded-lg group-hover:bg-blue-600/20 transition-colors"></div>
-                        </div>
-                        <div class="w-full h-24 bg-zinc-800/50 rounded-lg mt-auto mb-2"></div>
-                        {{-- Fake Button --}}
-                        <div class="w-full h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shadow-[0_0_15px_rgba(37,99,235,0.4)]">Helix App</div>
-                    </div>
-                </div>
-
-                {{-- App Text & Buttons --}}
-                <div class="flex flex-col justify-center h-full">
-                    <img src="{{ asset('logohelix.png') }}" alt="Helix Logo" class="h-10 w-auto mb-4">
-                    <p class="text-sm leading-relaxed text-zinc-400 mb-8 max-w-sm">
-                        Kelola RAB proyek, lacak material *real-time*, dan dapatkan diskon B2B khusus di aplikasi. Unduh gratis sekarang!
-                    </p>
-
-                    <div class="flex flex-col gap-3 w-full sm:w-auto">
-                        {{-- Tombol Android (Active) --}}
-                        <a href="#" class="flex items-center justify-center sm:justify-start gap-4 bg-white hover:bg-zinc-200 text-black px-6 py-3.5 rounded-xl transition-all duration-300 group shadow-lg">
-                            <i class="fab fa-google-play text-2xl group-hover:scale-110 transition-transform text-black"></i>
-                            <div class="text-left">
-                                <div class="text-[10px] uppercase font-bold text-zinc-600 leading-none mb-1">Dapatkan di</div>
-                                <div class="text-sm font-black leading-none tracking-wide">Google Play</div>
-                            </div>
-                        </a>
-
-                        {{-- Tombol iOS (Coming Soon) --}}
-                        <div class="flex items-center justify-center sm:justify-start gap-4 bg-zinc-900 border border-zinc-800 text-zinc-500 px-6 py-3.5 rounded-xl cursor-not-allowed relative overflow-hidden">
-                            <i class="fab fa-apple text-3xl"></i>
-                            <div class="text-left">
-                                <div class="text-[10px] uppercase font-bold text-blue-500 leading-none mb-1 flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span> Segera Hadir
-                                </div>
-                                <div class="text-sm font-black leading-none tracking-wide">App Store</div>
-                            </div>
-                            <div class="absolute inset-0 bg-black/40 z-10"></div>
-                        </div>
+                <div class="mt-4">
+                    <h5 class="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-3">Didukung Oleh:</h5>
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 bg-white/5 p-4 rounded-2xl border border-zinc-800">
+                        <img src="{{ asset('assets/logos/BIMA.png') }}" alt="BIMA" class="h-10 object-contain">
+                        <img src="{{ asset('assets/logos/DIKTISAITEK.png') }}" alt="DIKTISAITEK" class="h-10 object-contain">
+                        <img src="{{ asset('assets/logos/polsub.png') }}" alt="Polsub" class="h-10 object-contain">
+                        <img src="{{ asset('assets/logos/TUT WURI.png') }}" alt="Tut Wuri" class="h-10 object-contain">
                     </div>
                 </div>
             </div>
@@ -132,20 +96,11 @@
                 @endforeach
             </div>
 
-            {{-- Language Toggle & Certifications --}}
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-2 text-sm font-bold text-zinc-500">
-                    <button class="hover:text-white transition-colors">EN</button>
-                    <span>|</span>
-                    <button class="text-white">ID</button>
-                </div>
-            </div>
+            {{-- Language Toggle Removed --}}
+            <div class="flex items-center gap-6 hidden"></div>
 
-            {{-- Payment Icons (Grayscale -> Color on hover) --}}
+            {{-- Payment Icons --}}
             <div class="flex flex-wrap justify-center gap-3">
-                <div class="h-8 px-3 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 hover:text-white transition-colors"><i class="fab fa-cc-visa text-xl"></i></div>
-                <div class="h-8 px-3 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 hover:text-white transition-colors"><i class="fab fa-cc-mastercard text-xl"></i></div>
-                <div class="h-8 px-3 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 hover:text-white transition-colors"><i class="fas fa-building-columns text-lg"></i></div>
                 <div class="h-8 px-3 bg-zinc-900 border border-zinc-800 rounded flex items-center justify-center text-zinc-500 hover:text-white transition-colors font-bold text-[10px] tracking-wider">QRIS</div>
             </div>
 

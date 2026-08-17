@@ -13,7 +13,7 @@
 
             {{-- Logo --}}
             <a href="{{ url('/') }}" class="hidden sm:flex items-center gap-2 group">
-                <span class="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-500">Helix</span>
+                <img src="{{ asset('assets/logos/Logo Helix.png') }}" alt="Helix" class="h-10 object-contain drop-shadow-sm">
             </a>
         </div>
 
