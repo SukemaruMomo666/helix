@@ -1,0 +1,16 @@
+Kategori,Nama,Jumlah,Harga Per UOM,Harga per Product
+HPP,Ringer Tee Series,,,
+Bahan Baku,Makloon Sedjiwa,1,85000,85000
+Bahan Baku,Label Woven (Pcs),1,1541,1541
+Bahan Baku,Label Woven Samping (Pcs),1,1083,1083
+Bahan Baku,Hangtag (Pcs),1,365,365
+Subtotal,Cost of Material (Bahan Baku),,,87989
+Biaya Produksi,Biaya Konveksi (Pcs),1,0,0
+Subtotal,Harga Pokok Penjualan (HPP),,,87989
+Packaging,Ziplock (Packaging),1,2000,2000
+Packaging,Spunbond (Packaging),1,1500,1500
+Packaging,Sablon Spunbond (Packaging),1,1000,1000
+Biaya Lain,Biaya Platform (e-commerce),1,20%,18498
+Subtotal,Cost of Sales,,,109987
+Keuntungan,Margin,,100%,109987
+Total,Harga Jual,,,219974

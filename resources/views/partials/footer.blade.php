@@ -110,9 +110,9 @@
                         </li>
                         <li class="flex items-start gap-3 mt-4 text-xs leading-relaxed text-zinc-500">
                             <i class="fas fa-building mt-1 text-zinc-600"></i>
-                            Helix HQ<br>
-                            Jl. Jenderal Sudirman Kav. 21<br>
-                            Jakarta Selatan, 12190
+                            Helix<br>
+                            Bendungan Sadawarna<br>
+                            Desa Cibogo, Kab. Subang
                         </li>
                     </ul>
                 </div>
