@@ -67,9 +67,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="tel:0211500768" class="hover:text-blue-400 transition-colors flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white"><i class="fas fa-phone-alt text-xs"></i></div>
-                                (021) 1500-POTA
+                            <a href="https://wa.me/6285156677227" target="_blank" class="hover:text-emerald-400 transition-colors flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white"><i class="fab fa-whatsapp text-xs"></i></div>
+                                0851-5667-7227
                             </a>
                         </li>
                         <li class="flex items-start gap-3 mt-4 text-xs leading-relaxed text-zinc-500">
@@ -89,11 +89,9 @@
 
             {{-- Social Media (Minimalist B&W) --}}
             <div class="flex flex-wrap justify-center gap-3">
-                @foreach(['facebook-f', 'instagram', 'twitter', 'youtube', 'tiktok'] as $icon)
-                    <a href="#" class="w-10 h-10 rounded-full bg-white text-black hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all duration-300 shadow-md">
-                        <i class="fab fa-{{ $icon }} text-lg"></i>
-                    </a>
-                @endforeach
+                <a href="https://www.instagram.com/triple_helix_sadawarna?igsh=c2ttNm8yZzYycTlj&utm_source=qr" target="_blank" class="w-10 h-10 rounded-full bg-white text-black hover:bg-pink-600 hover:text-white flex items-center justify-center transition-all duration-300 shadow-md">
+                    <i class="fab fa-instagram text-lg"></i>
+                </a>
             </div>
 
             {{-- Language Toggle Removed --}}

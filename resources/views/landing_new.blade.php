@@ -231,7 +231,7 @@
                         <p class="text-slate-400 text-sm md:text-base">Tim CS kami siap membantu Anda 24/7.</p>
                     </div>
                 </div>
-                <a href="#" class="shrink-0 w-full md:w-auto bg-white text-slate-900 font-bold text-sm px-6 py-3.5 rounded-xl text-center hover:bg-slate-100 transition-colors shadow-sm flex items-center justify-center gap-2">
+                <a href="https://wa.me/6285156677227" target="_blank" class="shrink-0 w-full md:w-auto bg-white text-slate-900 font-bold text-sm px-6 py-3.5 rounded-xl text-center hover:bg-slate-100 transition-colors shadow-sm flex items-center justify-center gap-2">
                     <i class="fab fa-whatsapp text-emerald-500 text-lg"></i> Hubungi Kami di WA
                 </a>
             </div>
